@@ -3,7 +3,6 @@
 # Start the server in the background
 echo "Starting the server in the background..."
 go run greeter_server/main.go &
-SERVER_PID=$!
 
 # Wait for the server to start
 echo "Waiting for the server to start..."
@@ -15,4 +14,4 @@ go run greeter_client/main.go
 
 # Stop the server
 echo "Stopping the server..."
-kill $SERVER_PID
+kill -9 $(lsof -t -i:50051)
