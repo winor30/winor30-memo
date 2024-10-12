@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package proto.article.v1;
+
+import "google/protobuf/wrappers.proto";
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/winor30/winor30-memo/proto-validate-test/gen/proto/article/v1";
+
+service ArticleService {
+  rpc GetArticle (GetArticleRequest) returns (GetArticleResponse) {}
+  rpc CreateArticles (CreateArticlesRequest) returns (CreateArticlesResponse) {}
+}
+
+message Article {
+  string id = 1;
+  string title = 2;
+  string author = 3;
+  int64 created_at = 4;
+  int64 updated_at = 5;
+}
+
+message GetArticleRequest {
+  string id = 1;
+}
+
+message GetArticleResponse {
+  Article article = 1;
+}
+
+message CreateArticleInput {
+  google.protobuf.StringValue id = 1 [(buf.validate.field).string = {min_len: 1}];
+  string title = 2 [(buf.validate.field).string = {min_len: 1}];
+  string author = 3 [(buf.validate.field).string = {min_len: 1}];
+}
+
+message CreateArticlesRequest {
+  option (buf.validate.message).cel = {
+		id: "repeated.unique_by_field"
+		message: "repeated value must contain unique items, identified by the id field"
+		expression: "this.inputs.map(v, v.id).filter(id, id != null).unique()"
+	};
+  repeated CreateArticleInput inputs = 1;
+}
+
+message CreateArticlesResponse {
+  repeated Article articles = 1;
+}
